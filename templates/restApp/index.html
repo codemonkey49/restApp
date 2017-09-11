@@ -1,0 +1,15 @@
+{% extends "master/with_navigation.html"%}
+{% load static%}
+{%block body%}
+<script src={% static "restApp/testScript.js"%}></script>
+{%comment%}<script src="{{STATIC_URL}}restApp/testScript.js"></script>{%endcomment%}
+<p id="demo">unchanged text</p>
+<button type="button" onClick="updateScore(1,10)">ScoreButton</button>
+<button type="button" onClick=retrievePeople("cat")>retrieve</button>
+
+<form action={%url "index"%} method="post">
+    {%csrf_token%}
+    {{form}}
+    <input type="submit" value="Submit"/>
+</form>
+{%endblock%}
