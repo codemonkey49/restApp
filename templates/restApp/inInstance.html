@@ -1,5 +1,18 @@
 {%extends "master/with_navigation.html"%}
-
+{% load static%}
 {%block body%}
-{{username}}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src={% static "restApp/testScript.js"%}></script>
+<h3>people:</h3>
+<table id="scoreBoard">
+    <tr><td>nobody yet</td></tr>
+</table>
+<canvas id="myCanvas" width="200" height="100"></canvas>
+<form action={% url "inInstance"%} method="post" id="canvasForm">
+    {%csrf_token%}
+    {{form}}
+    <input type="button" value="submit" onclick="saveCanvas()"/>
+</form>
+<p id="demo">dont show this</p>
+<button id=tableBtn>tableBtn</button> 
 {%endblock%}

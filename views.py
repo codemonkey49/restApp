@@ -24,7 +24,7 @@ def index(request):
 
     if request.method=="POST":
         form=instanceIDForm(request.POST)
-
+        print "checking"
         if form.is_valid():
             data=form.cleaned_data
             instance=data["instanceID"]
@@ -35,6 +35,7 @@ def index(request):
             person.save()
             response= redirect("inInstance")
             response.set_cookie("username",name)
+            response.set_cookie("instanceID",instance)
             return response
 
     else:
@@ -45,6 +46,7 @@ def index(request):
     if name:
         response.set_cookie("username",name)
     return response
+    
 
 def inInstance(request):
     template="restApp/inInstance.html"
@@ -53,7 +55,35 @@ def inInstance(request):
         username=request.COOKIES["username"]
         context["username"]=username
     else:
-        context["username"]=request.COOKIES
+        return redirect("index")
+    if "instanceID" in request.COOKIES:
+        instanceID=request.COOKIES["instanceID"]
+    else:
+        return redirect("index")
+
+    if request.method == "POST":
+        form=canvasForm(request.POST)
+        if form.is_valid():
+           import re
+           import base64
+           dataUrlPattern = re.compile('data:image/(png|jpeg);base64,(.*)$')
+           ImageData = form.cleaned_data["image"]
+           ImageData = dataUrlPattern.match(ImageData).group(2)
+
+           # If none or len 0, means illegal image data
+           if ImageData == None or len(ImageData) == 0:
+                # PRINT ERROR MESSAGE HERE
+                pass
+
+           # Decode the 64 bit string into 32 bit
+           ImageData = base64.b64decode(ImageData) 
+           with open('picture_out.png', 'wb') as f:
+                f.write(ImageData)
+
+    else:
+        form=canvasForm()
+    context["form"]=form
+
     return render(request,template,context)
 
 
@@ -101,14 +131,16 @@ class ScoreUpdate(APIView):
         data=request.query_params
         points=data["points"]
         add=data["add"]
-        print points,
+        print points
         print add
+        print person
         if add:
             person.score=person.score+int(points)
         else:
             person.score=person.score-int(points)
         person.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    def get(self,request,personPk):
+def get(self,request,personPk):
         person=Person.objects.get(pk=personPk)
         return Response(person.score)
+
